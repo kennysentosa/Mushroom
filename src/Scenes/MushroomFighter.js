@@ -1,5 +1,7 @@
 import Phaser, { Create } from "phaser";
 
+import Bullets from "../UI/Bullets";
+
 export default class MushroomFighter extends Phaser.Scene{
     constructor() {
         super("Mushroom-Fighter-Scene")
@@ -13,8 +15,18 @@ export default class MushroomFighter extends Phaser.Scene{
         this.speed = 100
         this.cursors = this.input.keyboard.createCursorKeys();
 
+        this.invincibility = 0
+
         this.healthValue = 100
         this.healthDisplay = undefined
+
+        this.EXPbar = undefined
+
+        this.UIbelow = undefined
+        this.UIbelowbg = undefined
+        this.UIgroup = []
+
+        this.Bullets = undefined
     }
 
     preload() {
@@ -26,28 +38,43 @@ export default class MushroomFighter extends Phaser.Scene{
         //UI
         this.load.image("UIbelow", "Assets/UIbelow.png")
         this.load.image("UIbelowBG", "Assets/UIbelowBG.png")
+        //BUllets
+        this.Bullets.image("Bullets", "Assets/MushroomSpore.png")
     }
     
     create() {
+
         this.add.image(this.halfheight, this.halfwidth, "Bg");
-        this.add.image(this.halfwidth, 624, "UIbelowBG") //UI
         // this.healthDisplay = this.add.rectangle(123, 631, 166, 133, d40d3e)
-        this.Stats("Health", 0)
-        this.Stats("EXP", 338)
-        // this.add.image(this.halfwidth, 624, "UIbelow") //UI
+        // this.Stats("Health", 100)
+        // this.Stats("EXP", 320)
+
+        //UI 
+        this.UIbelowbg = this.physics.add.staticImage(this.halfwidth, 624, "UIbelowBG").setDepth(1) //UI
+        this.UIbelow = this.add.image(this.halfwidth, 624, "UIbelow").setDepth(3) //UI
         this.player = this.createplayer();
-        this.cameras.main.startFollow(this.player)
         this.cursors = this.input.keyboard.createCursorKeys()
+        this.healthDisplay = this.add.rectangle(123, 631, 166, 133, 0xEE4B2B).setDepth(2)
+        this.EXPbar = this.add.rectangle(349 , 579, 0, 42, 0x22baa3).setDepth(2)
+        this.UIgroup = [this.UIbelowbg, this.UIbelowbg, this.healthDisplay, this.EXPbar]
+
+        //COLIDER
+        this.physics.add.collider(this.player, this.UIbelowbg)
+        
     }
 
     update(time) {
         this.moveplayer(this.player, time)
+        this.invincibilityDown()
+        if (this.invincibility >= 0) {
+            this.invincibility -= 1
+        }
     }
 
     createplayer() {
         const player = this.physics.add
             .sprite(this.halfwidth, this.halfheight, "Mushroom")
-            .setSize(100, 100)
+            .setSize(50, 50)
         player.setCollideWorldBounds(true)
 
         this.anims.create({
@@ -82,6 +109,8 @@ export default class MushroomFighter extends Phaser.Scene{
         if (this.cursors.left.isDown) {
             this.player.setVelocityX(this.speed * -1);
             this.player.anims.play("Left", true);
+            this.Stats("Health", 2)
+            this.Stats("EXP", 1)
         } else if (this.cursors.right.isDown) {
             this.player.setVelocityX(this.speed);
             this.player.anims.play("Right", true);
@@ -91,19 +120,31 @@ export default class MushroomFighter extends Phaser.Scene{
         } else if (this.cursors.down.isDown) {
             this.player.setVelocityY(this.speed);
             this.player.anims.play("Down", true);
+        } else if (this.cursors.space.isDown) {
+
         } else {
             this.player.setVelocity(0, 0);
             this.player.anims.play("Standby", true);
         }
     }
 
-    Stats(Stat, Value) {
+    Stats(Stat, Value,time) {
         if (Stat == "Health") {
-            this.add.rectangle(123, 631, 166, 133 + Value/133, 0xa85232)
+            if (this.invincibility <= 0) {
+                this.healthDisplay.setAlpha(this.healthDisplay.alpha - Value / 100)
+                this.invincibility = 10
+            }
+
         } else if (Stat == "EXP") {
-            this.add.rectangle(349 , 579, 0 + Value/338 * 338, 42, 0x22baa3 )
+            if (this.EXPbar.width < 338){
+                this.EXPbar.width = Value + this.EXPbar.width
+            }
         }
+    }
 
-
+    invincibilityDown(){
+        if (this.invincibility >= 0) {
+            this.invincibility -= 1
+        }
     }
 }

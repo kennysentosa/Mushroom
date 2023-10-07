@@ -10,6 +10,7 @@ const config = {
     default: "arcade", // library Arcade Phaser
     arcade: {
       gravity: { y: 0 },
+      debug:true,
     },
   },
   scene: [MushroomFighter],
