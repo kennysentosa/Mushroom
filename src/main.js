@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import MushroomFighter from './Scenes/MushroomFighter';
+import GameOverScene from './Scenes/GameOverScene';
 
 const config = {
   type: Phaser.AUTO,
@@ -13,11 +14,12 @@ const config = {
       debug:true,
     },
   },
-  scene: [MushroomFighter],
+  scene: [MushroomFighter,GameOverScene],
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
-    } 
+    },
+
 };
 
 export default new Phaser.Game(config);
